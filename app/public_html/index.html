@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои Заметки</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
+        .note { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        .date { color: #888; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <h1>Список заметок</h1>
+
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="noteInput" placeholder="Текст заметки" style="padding: 5px; width: 70%;">
+        <button onclick="createNote()" style="padding: 5px;">Добавить</button>
+    </div>
+
+    <div id="notesList">Загрузка...</div>
+
+    <script>
+
+        async function loadNotes() {
+            const response = await fetch('/api/notes'); 
+            const notes = await response.json(); 
+            
+            const list = document.getElementById('notesList');
+            list.innerHTML = ''; 
+
+            notes.forEach(note => {
+                const div = document.createElement('div');
+                div.className = 'note';
+                div.innerHTML = `<strong>${note.text}</strong><br><span class="date">${note.date}</span>`;
+                list.appendChild(div);
+            });
+        }
+
+        async function createNote() {
+            const input = document.getElementById('noteInput');
+            const text = input.value;
+
+            if(!text) return alert('Введите текст!');
+
+            await fetch('/api/notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+
+            input.value = ''; 
+            loadNotes(); 
+        }
+        loadNotes();
+    </script>
+</body>
+</html>
